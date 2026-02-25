@@ -1,5 +1,6 @@
 'use client';
 
+import useServerStatus from '@/hooks/useServerStatus';
 import useSubmitVoice from '@/hooks/useSubmitVoice';
 import useVoiceRecorder from '@/hooks/useVoiceRecorder';
 import { useState } from 'react';
@@ -8,6 +9,7 @@ const IndexPage = () => {
   const [isVoiceInputEnabled, setIsVoiceInputEnabled] = useState(false);
   const [email, setEmail] = useState('');
 
+  const serverStatus = useServerStatus();
   const { submitVoice, loading, message, error } = useSubmitVoice();
   const {
     startRecording,
@@ -33,8 +35,37 @@ const IndexPage = () => {
     setEmail('');
   };
 
+  const statusColor =
+    serverStatus === 'up'
+      ? 'bg-green-500'
+      : serverStatus === 'down'
+        ? 'bg-red-500'
+        : 'bg-yellow-400';
+  const statusLabel =
+    serverStatus === 'up'
+      ? 'Server online'
+      : serverStatus === 'down'
+        ? 'Server offline'
+        : 'Checking...';
+
   return (
     <div className='flex flex-col items-center justify-center h-screen bg-white text-black'>
+      <div
+        className='fixed bottom-4 right-4 flex items-center gap-2 text-xs text-gray-500'
+        title={statusLabel}
+      >
+        <span className='relative flex h-2.5 w-2.5'>
+          {serverStatus === 'up' && (
+            <span
+              className={`animate-ping absolute inline-flex h-full w-full rounded-full ${statusColor} opacity-75`}
+            />
+          )}
+          <span
+            className={`relative inline-flex rounded-full h-2.5 w-2.5 ${statusColor}`}
+          />
+        </span>
+        <span>{statusLabel}</span>
+      </div>
       {isVoiceInputEnabled ? (
         <div className='flex flex-col items-center justify-center gap-4'>
           {message || error ? (
