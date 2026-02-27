@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { openai, toFile } from '../services/openai.js';
 import { resend } from '../services/resend.js';
+import { env } from '../constants/env.js';
 
 /**
  * For Audio to Text: GPT-4o mini Transcribe
@@ -8,6 +9,14 @@ import { resend } from '../services/resend.js';
  */
 
 export const submit_voice = async (req: Request, res: Response) => {
+  if (!env.generation_enabled) {
+    res.status(503).json({
+      message:
+        'Generation is currently disabled. This is intentional — the app is deployed in a restricted mode.'
+    });
+    return;
+  }
+
   try {
     const { email } = req.body as { email: string };
     const voiceFile = req.file;
